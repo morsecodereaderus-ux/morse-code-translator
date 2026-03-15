@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morse Code Translator – Convert Text to Morse Code Instantly</title>
+  <meta name="description" content="Free online Morse Code Translator. Convert text to Morse code and decode Morse code back to text instantly. For audio playback and advanced features, visit MorseCodeReader.com." />
+  <meta name="keywords" content="morse code translator, text to morse code, morse code decoder, morse code converter, online morse code tool" />
+  <link rel="canonical" href="https://morsecodereader.com" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Morse Code Translator – Convert Text to Morse Code Instantly" />
+  <meta property="og:description" content="Free online tool to encode and decode Morse code. Full-featured version with audio at MorseCodeReader.com." />
+  <meta property="og:url" content="https://morsecodereader.com" />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #0a0c0f;
+      --surface: #111318;
+      --surface2: #181c23;
+      --border: #2a2f3a;
+      --accent: #f5c542;
+      --accent2: #e07b39;
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.07) 3px,
+        rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 32px 0 24px;
+      position: relative;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .logo-morse {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+      opacity: 0.8;
+    }
+
+    h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .cta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #000;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 10px 18px;
+      border-radius: 4px;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 4px;
+    }
+    .cta-badge:hover { background: #ffd96a; transform: translateY(-1px); }
+
+    .header-desc {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 560px;
+    }
+
+    /* ── Tool Section ── */
+    .tool-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 40px 0;
+      overflow: hidden;
+    }
+
+    .tool-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .tool-title {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .mode-toggle {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .mode-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      letter-spacing: 0.05em;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .tool-body { padding: 20px; }
+
+    .io-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 560px) { .io-row { grid-template-columns: 1fr; } }
+
+    .io-block label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 140px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      padding: 12px;
+      resize: vertical;
+      transition: border-color 0.2s;
+      line-height: 1.6;
+    }
+
+    textarea:focus { outline: none; border-color: var(--accent); }
+    textarea[readonly] { background: #0d0f13; color: var(--accent); cursor: default; }
+    textarea::placeholder { color: var(--muted); opacity: 0.5; }
+
+    .tool-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 13px;
+      padding: 10px 20px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: all 0.15s;
+    }
+
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:hover { background: #ffd96a; }
+
+    .btn-secondary {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    .copy-feedback {
+      font-size: 12px;
+      color: var(--accent);
+      align-self: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .copy-feedback.show { opacity: 1; }
+
+    .advanced-link {
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: rgba(245,197,66,0.06);
+      border: 1px solid rgba(245,197,66,0.2);
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .advanced-link a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .advanced-link a:hover { text-decoration: underline; }
+
+    /* ── Content ── */
+    .content { padding-bottom: 60px; }
+
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin: 40px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h2::before {
+      content: '// ';
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.9em;
+    }
+
+    p { color: #b0b7c3; margin-bottom: 12px; font-size: 15px; }
+
+    strong { color: var(--text); }
+
+    ol, ul {
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    li {
+      color: #b0b7c3;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    /* Feature grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .feature-card .icon {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .feature-card strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .feature-card span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Reference table */
+    .morse-table-wrap { overflow-x: auto; margin: 16px 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    th {
+      background: var(--surface2);
+      color: var(--accent);
+      padding: 10px 14px;
+      text-align: left;
+      border: 1px solid var(--border);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+    }
+
+    td {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      color: #b0b7c3;
+    }
+
+    tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+
+    /* CTA block */
+    .cta-block {
+      background: linear-gradient(135deg, rgba(245,197,66,0.08), rgba(224,123,57,0.06));
+      border: 1px solid rgba(245,197,66,0.25);
+      border-radius: 8px;
+      padding: 28px;
+      margin: 36px 0;
+      text-align: center;
+    }
+
+    .cta-block h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .cta-block p { color: var(--muted); margin-bottom: 16px; font-size: 14px; }
+
+    .cta-block a.big-btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 28px;
+      border-radius: 4px;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: background 0.2s;
+    }
+    .cta-block a.big-btn:hover { background: #ffd96a; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+      text-align: center;
+    }
+
+    footer p { font-size: 13px; color: var(--muted); margin: 0; }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* Dot-dash animation in header */
+    .dot-dash {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--accent);
+      opacity: 0.4;
+      letter-spacing: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="dot-dash">·· — ·· ·· — — ·</div>
+    <div class="header-inner" style="margin-top:10px">
+      <div>
+        <div class="logo-morse">· — MORSE CODE TRANSLATOR — ·</div>
+        <h1>Convert <span>Text to Morse Code</span><br>Instantly — Free Online Tool</h1>
+        <p class="header-desc">
+          Encode any text into Morse code or decode a Morse sequence back to plain text.
+          Supports letters, numbers, and common symbols.
+        </p>
+      </div>
+      <a href="https://morsecodereader.com" class="cta-badge" rel="noopener">
+        ↗ Full Tool at MorseCodeReader.com
+      </a>
+    </div>
+  </header>
+
+  <!-- TOOL -->
+  <div class="tool-section" id="translator">
+    <div class="tool-header">
+      <span class="tool-title">· — Interactive Translator</span>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="btn-encode" onclick="setMode('encode')">Text → Morse</button>
+        <button class="mode-btn" id="btn-decode" onclick="setMode('decode')">Morse → Text</button>
+      </div>
+    </div>
+    <div class="tool-body">
+      <div class="io-row">
+        <div class="io-block">
+          <label id="lbl-input">Your Text</label>
+          <textarea id="input-area" placeholder="Type text here…" oninput="convert()"></textarea>
+        </div>
+        <div class="io-block">
+          <label id="lbl-output">Morse Code Output</label>
+          <textarea id="output-area" readonly placeholder="Morse code will appear here…"></textarea>
+        </div>
+      </div>
+      <div class="tool-actions">
+        <button class="btn btn-primary" onclick="convert()">Convert</button>
+        <button class="btn btn-secondary" onclick="copyOutput()">Copy Output</button>
+        <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+        <span class="copy-feedback" id="copy-fb">Copied!</span>
+      </div>
+      <div class="advanced-link">
+        Want <strong>audio playback</strong>, image decoding, and offline support?
+        Try the full-featured <a href="https://morsecodereader.com" rel="noopener">Morse Code Translator at MorseCodeReader.com</a> →
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <h2>What is Morse Code?</h2>
+    <p>
+      Morse code is a method of encoding text characters as sequences of dots (<code>·</code>) and dashes (<code>—</code>)
+      that can be transmitted via sound, light, or radio signals. It was invented in the 1830s by Samuel Morse and Alfred Vail,
+      and remains in use today by ham radio operators, survivalists, and puzzle enthusiasts worldwide.
+    </p>
+    <p>
+      Each letter and digit maps to a unique pattern. For example, <strong>SOS</strong> is
+      <code>· · ·  — — —  · · ·</code> — the most recognized Morse distress signal in the world.
+    </p>
+
+    <h2>How This Morse Code Translator Works</h2>
+    <p>This tool converts in two directions:</p>
+    <ul>
+      <li><strong>Text → Morse Code</strong>: Type any letters, numbers, or symbols and see the Morse equivalent instantly.</li>
+      <li><strong>Morse Code → Text</strong>: Paste a dot-dash sequence and decode it back to readable text.</li>
+    </ul>
+    <p>
+      Conversion happens entirely in your browser — no server, no data collection, no installation required.
+      For audio playback, waveform visualization, image decoding, and offline PWA support, visit the
+      <a href="https://morsecodereader.com" style="color:var(--accent);text-decoration:none;font-weight:600">full Morse Code Translator at MorseCodeReader.com</a>.
+    </p>
+
+    <h2>Practical Uses of a Morse Code Translator</h2>
+    <ol>
+      <li><strong>Ham Radio Communication</strong> – Decode or send Morse during amateur radio sessions.</li>
+      <li><strong>Emergency Signaling</strong> – Use Morse in survival situations without voice or internet.</li>
+      <li><strong>Learning &amp; Puzzles</strong> – Solve escape room clues, geocaching challenges, and brain games.</li>
+      <li><strong>Fun &amp; Creativity</strong> – Send secret messages to friends or learn Morse as a hobby.</li>
+      <li><strong>Accessibility</strong> – Morse is used in assistive communication devices.</li>
+    </ol>
+
+    <h2>Features</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="icon">⚡</div>
+        <strong>Instant Conversion</strong>
+        <span>Real-time encode & decode as you type</span>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🔡</div>
+        <strong>Full Character Set</strong>
+        <span>A–Z, 0–9, punctuation &amp; symbols</span>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📱</div>
+        <strong>Works Everywhere</strong>
+        <span>Desktop, tablet, and mobile browsers</span>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🔒</div>
+        <strong>Private</strong>
+        <span>100% browser-based, nothing is sent</span>
+      </div>
+    </div>
+
+    <h2>Quick Reference – Morse Code Chart</h2>
+    <div class="morse-table-wrap">
+      <table>
+        <thead>
+          <tr><th>Letter</th><th>Morse</th><th>Letter</th><th>Morse</th><th>Digit</th><th>Morse</th></tr>
+        </thead>
+        <tbody id="morse-table-body"></tbody>
+      </table>
+    </div>
+
+    <h2>Why Use This Translator?</h2>
+    <ul>
+      <li><strong>Learn Fast</strong> – Instantly see how every character maps to Morse code.</li>
+      <li><strong>Practice Anywhere</strong> – Online and lightweight, works on any device.</li>
+      <li><strong>Reliable &amp; Safe</strong> – No ads, no trackers, fully client-side.</li>
+      <li><strong>Reference Resource</strong> – Bookmark it as a quick Morse decoding guide.</li>
+    </ul>
+
+    <!-- CTA Block -->
+    <div class="cta-block">
+      <h3>Need Audio Playback & Advanced Features?</h3>
+      <p>The full tool at MorseCodeReader.com includes sound playback, practice drills,<br>image-based Morse decoding, and works offline as a Progressive Web App.</p>
+      <a href="https://morsecodereader.com" class="big-btn" rel="noopener">
+        Open MorseCodeReader.com →
+      </a>
+    </div>
+
+    <h2>Resources</h2>
+    <ul>
+      <li><a href="https://morsecodereader.com" style="color:var(--accent);text-decoration:none" rel="noopener"><strong>Official Morse Code Translator</strong></a> – Full online tool with sound, practice exercises, and image decoding.</li>
+      <li><a href="https://en.wikipedia.org/wiki/Morse_code" style="color:var(--accent);text-decoration:none" rel="noopener">International Morse Code Chart</a> – Learn the complete ITU standard symbol set.</li>
+    </ul>
+
+    <p style="margin-top:16px;font-size:13px;color:var(--muted)">
+      This project is for educational and demonstration purposes. For the official, full-featured tool, visit
+      <a href="https://morsecodereader.com" style="color:var(--accent);text-decoration:none" rel="noopener">MorseCodeReader.com</a>.
+    </p>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <p>
+      A companion resource for
+      <a href="https://morsecodereader.com" rel="noopener">MorseCodeReader.com</a>
+      — the web's most complete free Morse Code Translator.
+    </p>
+  </div>
+</footer>
+
+<!-- ── JS ── -->
+<script>
+  const MORSE = {
+    'A':'·—','B':'—···','C':'—·—·','D':'—··','E':'·','F':'··—·',
+    'G':'——·','H':'····','I':'··','J':'·———','K':'—·—','L':'·—··',
+    'M':'——','N':'—·','O':'———','P':'·——·','Q':'——·—','R':'·—·',
+    'S':'···','T':'—','U':'··—','V':'···—','W':'·——','X':'—··—',
+    'Y':'—·——','Z':'——··',
+    '0':'—————','1':'·————','2':'··———','3':'···——','4':'····—',
+    '5':'·····','6':'—····','7':'——···','8':'———··','9':'————·',
+    '.':'·—·—·—',',':'——··——','?':'··——··','!':'—·—·——',
+    '/':'—··—·','(':'—·——·',')':'—·——·—','&':'·—···',':':'———···',
+    ';':'—·—·—·','=':'—···—','+':'·—·—·','-':'—····—',
+    '_':'··——·—','"':'·—··—·','$':'···—··—','@':'·——·—·'
+  };
+
+  const TEXT_MAP = Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));
+
+  let mode = 'encode';
+
+  function setMode(m) {
+    mode = m;
+    document.getElementById('btn-encode').classList.toggle('active', m==='encode');
+    document.getElementById('btn-decode').classList.toggle('active', m==='decode');
+    document.getElementById('lbl-input').textContent  = m==='encode' ? 'Your Text' : 'Morse Code (use spaces)';
+    document.getElementById('lbl-output').textContent = m==='encode' ? 'Morse Code Output' : 'Decoded Text';
+    document.getElementById('input-area').placeholder = m==='encode' ? 'Type text here…' : '·— — ··· ···  (space between letters, 2 spaces between words)';
+    clearAll();
+  }
+
+  function encode(text) {
+    return text.toUpperCase().split('').map(ch => {
+      if (ch === ' ') return '  ';
+      return MORSE[ch] || '?';
+    }).join(' ');
+  }
+
+  function decode(morse) {
+    return morse.split('  ').map(word =>
+      word.trim().split(' ').map(sym => TEXT_MAP[sym] || '?').join('')
+    ).join(' ');
+  }
+
+  function convert() {
+    const input = document.getElementById('input-area').value;
+    document.getElementById('output-area').value = mode==='encode' ? encode(input) : decode(input);
+  }
+
+  function clearAll() {
+    document.getElementById('input-area').value = '';
+    document.getElementById('output-area').value = '';
+  }
+
+  function copyOutput() {
+    const out = document.getElementById('output-area').value;
+    if (!out) return;
+    navigator.clipboard.writeText(out).then(() => {
+      const fb = document.getElementById('copy-fb');
+      fb.classList.add('show');
+      setTimeout(() => fb.classList.remove('show'), 1800);
+    });
+  }
+
+  // Build reference table
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const digits  = '0123456789'.split('');
+  const tbody   = document.getElementById('morse-table-body');
+  const half    = Math.ceil(letters.length / 2);
+  for (let i = 0; i < half; i++) {
+    const l1 = letters[i], l2 = letters[i+half] || '';
+    const d  = digits[i] || '';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${l1}</td><td>${MORSE[l1]||''}</td><td>${l2}</td><td>${l2?MORSE[l2]:''}</td><td>${d}</td><td>${d?MORSE[d]:''}</td>`;
+    tbody.appendChild(tr);
+  }
+</script>
+</body>
+</html>
