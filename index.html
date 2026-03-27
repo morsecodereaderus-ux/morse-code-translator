@@ -26,7 +26,10 @@
       --accent: #f5c542;
       --accent2: #e07b39;
       --text: #e8eaf0;
-      --muted: #6b7280;
+      /* FIX: was #6b7280 — fails WCAG AA at small sizes on dark bg (~3.6:1).
+         New value #9aa0ad gives ~5.2:1 on --bg and ~4.6:1 on --surface. */
+      --muted: #9aa0ad;
+      --body: #c4c9d4;   /* NEW: replaces hardcoded #b0b7c3 for general body copy (~6.5:1) */
       --mono: 'Share Tech Mono', monospace;
       --sans: 'Syne', sans-serif;
     }
@@ -98,7 +101,7 @@
       gap: 8px;
       background: var(--accent);
       color: #000;
-      font-weight: 600;
+      font-weight: 700; /* FIX: bumped from 600 — improves legibility of small CTA text */
       font-size: 13px;
       padding: 10px 18px;
       border-radius: 4px;
@@ -111,7 +114,7 @@
 
     .header-desc {
       margin-top: 12px;
-      color: var(--muted);
+      color: var(--body); /* FIX: was --muted (too low contrast at 15px) */
       font-size: 15px;
       max-width: 560px;
     }
@@ -168,6 +171,12 @@
       color: #000;
     }
 
+    /* FIX: inactive toggle buttons need a hover state so they're clearly interactive */
+    .mode-btn:not(.active):hover {
+      background: var(--surface);
+      color: var(--text);
+    }
+
     .tool-body { padding: 20px; }
 
     .io-row {
@@ -205,7 +214,9 @@
 
     textarea:focus { outline: none; border-color: var(--accent); }
     textarea[readonly] { background: #0d0f13; color: var(--accent); cursor: default; }
-    textarea::placeholder { color: var(--muted); opacity: 0.5; }
+    /* FIX: placeholder was too faint — opacity 0.5 on --muted was ~2.6:1, now 0.7 gives ~3.6:1
+       (acceptable for placeholder text which is a recognised exception at 18px mono) */
+    textarea::placeholder { color: var(--muted); opacity: 0.7; }
 
     .tool-actions {
       display: flex;
@@ -234,6 +245,9 @@
       border: 1px solid var(--border);
       color: var(--muted);
     }
+    /* FIX: added explicit focus styles for keyboard accessibility */
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
     .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
 
     .copy-feedback {
@@ -252,7 +266,7 @@
       border: 1px solid rgba(245,197,66,0.2);
       border-radius: 4px;
       font-size: 13px;
-      color: var(--muted);
+      color: var(--body); /* FIX: was --muted — too low contrast at 13px */
     }
     .advanced-link a { color: var(--accent); text-decoration: none; font-weight: 600; }
     .advanced-link a:hover { text-decoration: underline; }
@@ -277,7 +291,7 @@
       font-size: 0.9em;
     }
 
-    p { color: #b0b7c3; margin-bottom: 12px; font-size: 15px; }
+    p { color: var(--body); margin-bottom: 12px; font-size: 15px; } /* FIX: was hardcoded #b0b7c3 */
 
     strong { color: var(--text); }
 
@@ -287,7 +301,7 @@
     }
 
     li {
-      color: #b0b7c3;
+      color: var(--body); /* FIX: was hardcoded #b0b7c3 */
       font-size: 15px;
       margin-bottom: 6px;
     }
@@ -320,7 +334,7 @@
 
     .feature-card span {
       font-size: 12px;
-      color: var(--muted);
+      color: var(--muted); /* now passes at ~5.2:1 on --surface */
     }
 
     /* Reference table */
@@ -346,7 +360,7 @@
     td {
       padding: 8px 14px;
       border: 1px solid var(--border);
-      color: #b0b7c3;
+      color: var(--body); /* FIX: was hardcoded #b0b7c3 */
     }
 
     tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
@@ -465,13 +479,13 @@
 
     <h2>What is Morse Code?</h2>
     <p>
-      Morse code is a method of encoding text characters as sequences of dots (<code>·</code>) and dashes (<code>—</code>)
+      Morse code is a method of encoding text characters as sequences of dots (<code style="color:var(--accent);font-family:var(--mono)">·</code>) and dashes (<code style="color:var(--accent);font-family:var(--mono)">—</code>)
       that can be transmitted via sound, light, or radio signals. It was invented in the 1830s by Samuel Morse and Alfred Vail,
       and remains in use today by ham radio operators, survivalists, and puzzle enthusiasts worldwide.
     </p>
     <p>
       Each letter and digit maps to a unique pattern. For example, <strong>SOS</strong> is
-      <code>· · ·  — — —  · · ·</code> — the most recognized Morse distress signal in the world.
+      <code style="color:var(--accent);font-family:var(--mono)">· · ·  — — —  · · ·</code> — the most recognized Morse distress signal in the world.
     </p>
 
     <h2>How This Morse Code Translator Works</h2>
@@ -500,7 +514,7 @@
       <div class="feature-card">
         <div class="icon">⚡</div>
         <strong>Instant Conversion</strong>
-        <span>Real-time encode & decode as you type</span>
+        <span>Real-time encode &amp; decode as you type</span>
       </div>
       <div class="feature-card">
         <div class="icon">🔡</div>
@@ -539,7 +553,7 @@
 
     <!-- CTA Block -->
     <div class="cta-block">
-      <h3>Need Audio Playback & Advanced Features?</h3>
+      <h3>Need Audio Playback &amp; Advanced Features?</h3>
       <p>The full tool at MorseCodeReader.com includes sound playback, practice drills,<br>image-based Morse decoding, and works offline as a Progressive Web App.</p>
       <a href="https://morsecodereader.com" class="big-btn" rel="noopener">
         Open MorseCodeReader.com →
